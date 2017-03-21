@@ -6,12 +6,14 @@
  * Date: 20/03/2017
  * Time: 13:06
  */
-
 namespace Fabs\DI;
+
 class DI implements \ArrayAccess
 {
     protected static $defaultInstance;
-
+    /**
+     * @var Service[]
+     */
     protected $services = [];
 
     /**
@@ -57,7 +59,28 @@ class DI implements \ArrayAccess
 
     public function get($service_name)
     {
-        return $this->getService($service_name)->resolve();
+        $resolved = $this->getService($service_name)->resolve();
+
+        if ($resolved instanceof Injectable) {
+            if (!$resolved->isServicesInjected()) {
+                $resolved->setServicesInjected(true);
+
+                foreach ($this->services as $service) {
+                    $method_name = 'set ' . $service->getServiceName();
+
+                    $method_name = str_replace(' ', '', ucwords(str_replace('-', ' ', str_replace('_', ' ', $method_name))));
+                    $method_name[0] = strtolower($method_name[0]);
+
+                    if (strpos($method_name, 'Service') === false) {
+                        $method_name .= 'Service';
+                    }
+                    if (method_exists($resolved, $method_name)) {
+                        $resolved->{$method_name}($this->get($service->getServiceName()));
+                    }
+                }
+            }
+        }
+        return $resolved;
     }
 
     public function has($service_name)

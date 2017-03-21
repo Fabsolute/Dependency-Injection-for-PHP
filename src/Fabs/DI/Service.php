@@ -18,7 +18,6 @@ class Service
     protected $shared_instance;
     protected $parameters = [];
 
-
     public function __construct($service_name, $definition, $is_shared)
     {
         $this->service_name = $service_name;
@@ -36,6 +35,11 @@ class Service
         return $this->parameters;
     }
 
+    public function getDefinition()
+    {
+        return $this->definition;
+    }
+
     public function setParameters($parameters)
     {
         if (is_array($parameters)) {
@@ -51,6 +55,14 @@ class Service
     public function isShared()
     {
         return $this->is_shared;
+    }
+
+    public function setDefinition($definition)
+    {
+        if ($this->definition != $definition) {
+            $this->shared_instance = null;
+        }
+        $this->definition = $definition;
     }
 
     public function resolve()
