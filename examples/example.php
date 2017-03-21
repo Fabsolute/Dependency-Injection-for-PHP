@@ -26,6 +26,9 @@ $di->set('calculator', function () {
 $di->set('another_service', 'AnotherService')
     ->setParameters([7, 8]);
 
+
+$di->set('another_custom_service', 'AnotherService')->setParameters([4, 5]);
+
 /** @var CalculatorService $calculator */
 $calculator = $di->get('calculator');
 
@@ -54,3 +57,13 @@ $overrided_another = $di['another_service'];
 
 echo '<br>';
 echo $overrided_another->add(9, 4);
+
+echo '<br>';
+/** @var AnotherService $another_custom_service */
+$another_custom_service = $di->get('another_custom_service');
+echo $another_custom_service->calculate();
+
+echo '<br>';
+/** @var AnotherService $another_custom_service_with_parameter */
+$another_custom_service_with_parameter = $di->get('another_custom_service', [5, 9]);
+echo $another_custom_service_with_parameter->calculate();

@@ -65,7 +65,7 @@ class Service
         $this->definition = $definition;
     }
 
-    public function resolve()
+    public function resolve($parameters = null)
     {
         $resolved = false;
         if ($this->is_shared) {
@@ -76,10 +76,14 @@ class Service
 
         $instance = null;
 
+        if ($parameters == null || count($parameters) == 0 || $this->isShared()) {
+            $parameters = $this->parameters;
+        }
+
         if (is_string($this->definition)) {
             if (class_exists($this->definition)) {
-                if ($this->parameters != null && count($this->parameters) > 0) {
-                    $instance = new $this->definition(...$this->parameters);
+                if ($parameters != null && count($parameters) > 0) {
+                    $instance = new $this->definition(...$parameters);
                 } else {
                     $instance = new $this->definition();
                 }
@@ -87,8 +91,8 @@ class Service
             }
         } else {
             if (is_callable($this->definition)) {
-                if ($this->parameters != null && count($this->parameters) > 0) {
-                    $instance = call_user_func_array($this->definition, $this->parameters);
+                if ($parameters != null && count($parameters) > 0) {
+                    $instance = call_user_func_array($this->definition, $parameters);
                 } else {
                     $instance = call_user_func($this->definition);
                 }

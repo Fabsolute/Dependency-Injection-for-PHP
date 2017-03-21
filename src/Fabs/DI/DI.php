@@ -57,9 +57,9 @@ class DI implements \ArrayAccess
         throw new \Exception("Service '" . $service_name . "' wasn't found in the dependency injection container");
     }
 
-    public function get($service_name)
+    public function get($service_name, $parameters = null)
     {
-        $resolved = $this->getService($service_name)->resolve();
+        $resolved = $this->getService($service_name)->resolve($parameters);
 
         if ($resolved instanceof Injectable) {
             if (!$resolved->isServicesInjected()) {
