@@ -8,10 +8,10 @@
 
 namespace Fabs\DI;
 
-
 abstract class Injectable
 {
     private $dependency_injector;
+    private $is_services_injected = false;
 
     public function setDI($dependency_injector)
     {
@@ -24,5 +24,15 @@ abstract class Injectable
             $this->dependency_injector = DI::getDefault();
         }
         return $this->dependency_injector;
+    }
+
+    public function setServicesInjected($is_services_injected)
+    {
+        $this->is_services_injected = $is_services_injected;
+    }
+
+    public function isServicesInjected()
+    {
+        return $this->is_services_injected;
     }
 }
