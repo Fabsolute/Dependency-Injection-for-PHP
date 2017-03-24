@@ -10,7 +10,7 @@ namespace Fabs\DI;
 
 class DI implements \ArrayAccess
 {
-    protected static $defaultInstance;
+    private static $defaultInstance;
     /**
      * @var Service[]
      */
@@ -25,6 +25,14 @@ class DI implements \ArrayAccess
             self::$defaultInstance = new DI();
         }
         return self::$defaultInstance;
+    }
+
+    /**
+     * @param $di DI
+     */
+    public static function setDefault($di)
+    {
+        self::$defaultInstance = $di;
     }
 
     public function set($service_name, $definition, $shared = false)
