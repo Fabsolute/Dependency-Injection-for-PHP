@@ -18,9 +18,4 @@ class MathService extends Injectable
     {
         return $number1 * $number2;
     }
-
-    public function setAhmetService($service)
-    {
-
-    }
 }
