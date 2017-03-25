@@ -13,9 +13,9 @@ $di = DI::getDefault();
 $di->set('function_example',function(){
     return new MyCustomService();
 });
-
+// or
 $di->set('class_name_example', MyCustomService::class);
-
+// or
 $di->set('parameter_example',function($first,$second){
     return new MyCustomService($first, $second);
 })->setParameters([1,'second']);
@@ -33,7 +33,9 @@ Set a shared service
 ```php
 $di = DI::getDefault();
 
-$di->setShared'test_service', new MyCustomService());
+$di->setShared('test_service', new MyCustomService());
+// or
+$di->set('test_service', new MyCustomService(), true);
 ```
 
 Get a service
@@ -41,6 +43,8 @@ Get a service
 $di = DI::getDefault();
 
 $service = $di->get('test_service');
-
+// or
 $service = $di['test_service'];
+// or
+$service = $di->get('parameter_example',[8,'example']);
 ```
