@@ -111,10 +111,6 @@ class Service
             $this->shared_instance = $instance;
         }
 
-        if ($instance instanceof Injectable) {
-            $instance->setDI($this);
-        }
-
         return $instance;
     }
 }
