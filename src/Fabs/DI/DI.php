@@ -70,6 +70,7 @@ class DI implements \ArrayAccess
         $resolved = $this->getService($service_name)->resolve($parameters);
 
         if ($resolved instanceof Injectable) {
+            $resolved->setDI($this);
             if (!$resolved->isServicesInjected()) {
                 $resolved->setServicesInjected(true);
 
