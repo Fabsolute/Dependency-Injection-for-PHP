@@ -1,5 +1,6 @@
 <?php
 use Fabs\DI\Injectable;
+use Fabs\DI\Annotations\Inject;
 
 /**
  * Created by PhpStorm.
@@ -9,8 +10,11 @@ use Fabs\DI\Injectable;
  */
 class AnotherService extends Injectable
 {
-    /** @var  CalculatorService */
-    protected $calculator;
+    /**
+     * @Inject("calculator")
+     * @var CalculatorService
+     */
+    public $calculator;
 
     private $number_1;
     private $number_2;
@@ -27,10 +31,5 @@ class AnotherService extends Injectable
         $this->calculator->setNumber2($this->number_2);
 
         return $this->calculator->multiply();
-    }
-
-    public function setCalculatorService($calculator)
-    {
-        $this->calculator = $calculator;
     }
 }

@@ -21,5 +21,8 @@
     "psr-0": {
       "Fabs\\DI": "src"
     }
+  },
+  "require": {
+    "doctrine/annotations": "^1.4"
   }
 }

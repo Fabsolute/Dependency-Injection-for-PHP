@@ -8,6 +8,10 @@
  */
 namespace Fabs\DI;
 
+use Doctrine\Common\Annotations\AnnotationReader;
+use Doctrine\Common\Annotations\AnnotationRegistry;
+use Fabs\DI\Annotations\Inject;
+
 class DI implements \ArrayAccess
 {
     private static $defaultInstance;
@@ -15,6 +19,11 @@ class DI implements \ArrayAccess
      * @var Service[]
      */
     protected $services = [];
+
+    public function __construct()
+    {
+        AnnotationRegistry::registerFile(__DIR__ . '/Annotations/Inject.php');
+    }
 
     /**
      * @return DI
@@ -86,6 +95,27 @@ class DI implements \ArrayAccess
                     if (method_exists($resolved, $method_name)) {
                         $resolved->{$method_name}($this->get($service->getServiceName()));
                     }
+                }
+                $reflected_class = new \ReflectionObject($resolved);
+                $properties = $reflected_class->getProperties();
+                $annotationReader = new AnnotationReader();
+
+                foreach ($properties as $property) {
+                    /** @var Inject $inject */
+                    $inject = $annotationReader->getPropertyAnnotation($property, Inject::class);
+                    if ($inject != null && $inject->value != null) {
+                        $service = null;
+                        if ($this->has($inject->value)) {
+                            $service = $this->get($inject->value);
+                        } else if ($this->has($inject->value . 'Service')) {
+                            $service = $this->get($inject->value . 'Service');
+                        }
+
+                        if ($service != null) {
+                            $property->setValue($resolved, $service);
+                        }
+                    }
+
                 }
             }
         }

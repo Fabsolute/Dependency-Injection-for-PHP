@@ -2,3 +2,5 @@ index.php
 autoload.php
 TestInjectable.php
 .idea/
+vendor/
+composer.lock
