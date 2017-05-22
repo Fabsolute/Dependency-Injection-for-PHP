@@ -11,7 +11,7 @@ use Fabs\DI\Annotations\Inject;
 class AnotherService extends Injectable
 {
     /**
-     * @Inject("calculator")
+     * @Inject()
      * @var CalculatorService
      */
     public $calculator;
