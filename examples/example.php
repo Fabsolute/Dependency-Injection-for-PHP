@@ -67,3 +67,13 @@ echo '<br>';
 /** @var AnotherService $another_custom_service_with_parameter */
 $another_custom_service_with_parameter = $di->get('another_custom_service', [5, 9]);
 echo $another_custom_service_with_parameter->calculate();
+
+
+
+
+/** @var InjectionWithoutInjectable $create_with_di */
+$create_with_di = $di->create(InjectionWithoutInjectable::class);
+$create_with_di->done('with_di');
+
+$create_without_di = new InjectionWithoutInjectable();
+$create_without_di->done('without_di');
