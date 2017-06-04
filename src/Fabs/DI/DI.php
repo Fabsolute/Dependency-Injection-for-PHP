@@ -12,7 +12,7 @@ use Doctrine\Common\Annotations\AnnotationReader;
 use Doctrine\Common\Annotations\AnnotationRegistry;
 use Fabs\DI\Annotations\Inject;
 
-class DI implements \ArrayAccess
+class DI extends Injectable implements \ArrayAccess
 {
     private static $defaultInstance;
     /**
