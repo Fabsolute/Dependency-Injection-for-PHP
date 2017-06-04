@@ -35,4 +35,21 @@ abstract class Injectable
     {
         return $this->is_services_injected;
     }
+
+    public function __get($name)
+    {
+        $di = $this->getDI();
+        if ($name == 'di') {
+            $this->{$name} = $di;
+            return $di;
+        }
+
+        if ($di->has($name)) {
+            $response = $di->get($name);
+            $this->{$name} = $response;
+            return $response;
+        }
+
+        return null;
+    }
 }
