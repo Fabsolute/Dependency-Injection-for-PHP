@@ -91,9 +91,6 @@ class ServiceDefinition
         if (is_string($definition)) {
             if (class_exists($definition)) {
                 $instance = new $definition;
-                if ($instance instanceof ServiceFactoryBase) {
-                    $instance = $instance->create($this->parameters);
-                }
             }
         } else {
             if (is_callable($definition)) {
@@ -101,6 +98,10 @@ class ServiceDefinition
             } else {
                 $instance = $definition;
             }
+        }
+
+        if ($instance instanceof ServiceFactoryBase) {
+            $instance = $instance->create($this->parameters);
         }
 
         if ($this->isShared()) {
