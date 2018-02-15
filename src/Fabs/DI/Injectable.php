@@ -1,23 +1,28 @@
 <?php
-/**
- * Created by PhpStorm.
- * User: ahmetturk
- * Date: 20/03/2017
- * Time: 13:47
- */
+
 
 namespace Fabs\DI;
 
 abstract class Injectable
 {
-    private $dependency_injector;
-    private $is_services_injected = false;
+    /**
+     * @var DI
+     */
+    private $dependency_injector = null;
 
+    /**
+     * @param DI $dependency_injector
+     * @author ahmetturk <ahmetturk93@gmail.com>
+     */
     public function setDI($dependency_injector)
     {
         $this->dependency_injector = $dependency_injector;
     }
 
+    /**
+     * @return DI
+     * @author ahmetturk <ahmetturk93@gmail.com>
+     */
     public function getDI()
     {
         if (!is_object($this->dependency_injector)) {
@@ -26,30 +31,18 @@ abstract class Injectable
         return $this->dependency_injector;
     }
 
-    public function setServicesInjected($is_services_injected)
-    {
-        $this->is_services_injected = $is_services_injected;
-    }
-
-    public function isServicesInjected()
-    {
-        return $this->is_services_injected;
-    }
-
+    /**
+     * @param string $name
+     * @return mixed
+     * @author ahmetturk <ahmetturk93@gmail.com>
+     */
     public function __get($name)
     {
-        $di = $this->getDI();
-        if ($name == 'di') {
-            $this->{$name} = $di;
-            return $di;
+        $dependency_injector = $this->getDI();
+        if ($dependency_injector->has($name)) {
+            $this->{$name} = $dependency_injector->get($name);
         }
 
-        if ($di->has($name)) {
-            $response = $di->get($name);
-            $this->{$name} = $response;
-            return $response;
-        }
-
-        return null;
+        return $this->{$name};
     }
 }

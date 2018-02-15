@@ -1,173 +1,164 @@
 <?php
 
-/**
- * Created by PhpStorm.
- * User: ahmetturk
- * Date: 20/03/2017
- * Time: 13:06
- */
+
 namespace Fabs\DI;
 
-use Doctrine\Common\Annotations\AnnotationReader;
-use Doctrine\Common\Annotations\AnnotationRegistry;
-use Fabs\DI\Annotations\Inject;
 
-class DI extends Injectable implements \ArrayAccess
+use Psr\Container\ContainerInterface;
+
+class DI implements \ArrayAccess, ContainerInterface
 {
-    private static $defaultInstance;
+    /** @var DI */
+    private static $default_dependency_injector = null;
     /**
-     * @var Service[]
+     * @var ServiceDefinition[]
      */
-    protected $services = [];
-
-    public function __construct()
-    {
-        AnnotationRegistry::registerFile(__DIR__ . '/Annotations/Inject.php');
-    }
+    protected $service_lookup = [];
 
     /**
      * @return DI
+     * @author ahmetturk <ahmetturk93@gmail.com>
      */
     public static function getDefault()
     {
-        if (self::$defaultInstance == null) {
-            self::$defaultInstance = new DI();
+        if (self::$default_dependency_injector === null) {
+            self::$default_dependency_injector = new DI();
         }
-        return self::$defaultInstance;
+
+        return self::$default_dependency_injector;
     }
 
     /**
-     * @param $di DI
+     * @param DI $dependency_injector
+     * @author ahmetturk <ahmetturk93@gmail.com>
      */
-    public static function setDefault($di)
+    public static function setDefault($dependency_injector)
     {
-        self::$defaultInstance = $di;
-    }
-
-    public function set($service_name, $definition, $shared = false)
-    {
-        $service = new Service($service_name, $definition, $shared);
-        $this->services[$service_name] = $service;
-        return $service;
-    }
-
-    public function setShared($service_name, $definition)
-    {
-        return $this->set($service_name, $definition, true);
-    }
-
-    public function remove($service_name)
-    {
-        unset($this->services[$service_name]);
+        self::$default_dependency_injector = $dependency_injector;
     }
 
     /**
-     * @param $service_name
-     * @return Service
-     * @throws \Exception
+     * @param string $service_name
+     * @param string|callable|mixed $definition
+     * @param bool $shared
+     * @param array $parameters
+     * @return ServiceDefinition
+     * @author ahmetturk <ahmetturk93@gmail.com>
+     */
+    public function set($service_name, $definition, $shared = false, $parameters = [])
+    {
+        $service_definition = new ServiceDefinition($service_name, $definition, $shared, $parameters);
+        $this->service_lookup[$service_name] = $service_definition;
+        return $service_definition;
+    }
+
+    /**
+     * @param string $service_name
+     * @param string|callable|mixed $definition
+     * @param array $parameters
+     * @return ServiceDefinition
+     * @author ahmetturk <ahmetturk93@gmail.com>
+     */
+    public function setShared($service_name, $definition, $parameters = [])
+    {
+        return $this->set($service_name, $definition, true, $parameters);
+    }
+
+    /**
+     * @param string $service_name
+     * @return ServiceDefinition
+     * @author ahmetturk <ahmetturk93@gmail.com>
      */
     public function getService($service_name)
     {
-        if (isset($this->services[$service_name])) {
-            return $this->services[$service_name];
+        if (array_key_exists($service_name, $this->service_lookup)) {
+            return $this->service_lookup[$service_name];
         }
-        throw new \Exception("Service '" . $service_name . "' wasn't found in the dependency injection container");
+
+        return null;
     }
 
-    public function get($service_name, $parameters = null)
+    /**
+     * @param string $service_name
+     * @return mixed|null
+     * @author ahmetturk <ahmetturk93@gmail.com>
+     */
+    public function get($service_name)
     {
-        $resolved = $this->getService($service_name)->resolve($parameters);
-
-        if ($resolved instanceof Injectable) {
-            $resolved->setDI($this);
-            if (!$resolved->isServicesInjected()) {
-                $resolved->setServicesInjected(true);
-                $this->inject($resolved);
-            }
+        $service = $this->getService($service_name);
+        if ($service === null) {
+            // todo throw
+            return null;
         }
-        return $resolved;
+
+        return $this->resolve($service);
     }
 
+    /**
+     * @param ServiceDefinition $service
+     * @return mixed|null
+     * @author ahmetturk <ahmetturk93@gmail.com>
+     */
+    private function resolve($service)
+    {
+        $instance = $service->getInstance();
+
+        if ($instance instanceof Injectable) {
+            $instance->setDI($this);
+        }
+
+        return $instance;
+    }
+
+    /**
+     * @param string $service_name
+     * @return bool
+     * @author ahmetturk <ahmetturk93@gmail.com>
+     */
     public function has($service_name)
     {
-        return isset($this->services[$service_name]);
+        return array_key_exists($service_name, $this->service_lookup);
     }
 
+    /**
+     * @param string $service_name
+     * @return bool
+     * @author ahmetturk <ahmetturk93@gmail.com>
+     */
     public function offsetExists($service_name)
     {
         return $this->has($service_name);
     }
 
+    /**
+     * @param string $service_name
+     * @return mixed|null
+     * @author ahmetturk <ahmetturk93@gmail.com>
+     */
     public function offsetGet($service_name)
     {
         return $this->get($service_name);
     }
 
+    /**
+     * @param string $service_name
+     * @param string|callable|mixed $definition
+     * @return bool
+     * @author ahmetturk <ahmetturk93@gmail.com>
+     */
     public function offsetSet($service_name, $definition)
     {
-        $this->setShared($service_name, $definition);
+        $this->set($service_name, $definition, true);
         return true;
     }
 
-    public function offsetUnset($offset)
+    /**
+     * @param string $service_name
+     * @return bool
+     * @author ahmetturk <ahmetturk93@gmail.com>
+     */
+    public function offsetUnset($service_name)
     {
         return false;
-    }
-
-    public function create($class_name, $parameters = [])
-    {
-        $reflected_class = new \ReflectionClass($class_name);
-        if ($reflected_class != null) {
-            $output = $reflected_class->newInstanceArgs($parameters);
-            $this->inject($output);
-            return $output;
-        }
-        return null;
-    }
-
-    public function inject($inject_object)
-    {
-        foreach ($this->services as $service) {
-            $method_name = 'set ' . $service->getServiceName();
-
-            $method_name = str_replace(' ', '', ucwords(str_replace('-', ' ', str_replace('_', ' ', $method_name))));
-            $method_name[0] = strtolower($method_name[0]);
-
-            if (strpos($method_name, 'Service') === false) {
-                $method_name .= 'Service';
-            }
-            if (method_exists($inject_object, $method_name)) {
-                call_user_func([$inject_object, $method_name], $this->get($service->getServiceName()));
-            }
-        }
-
-        $reflected_class = new \ReflectionObject($inject_object);
-        $properties = $reflected_class->getProperties();
-        $annotationReader = new AnnotationReader();
-
-        foreach ($properties as $property) {
-            /** @var Inject $inject */
-            $inject = $annotationReader->getPropertyAnnotation($property, Inject::class);
-            if ($inject != null) {
-
-                $name = $inject->value;
-                if ($name == null) {
-                    $name = $property->name;
-                }
-
-                $name = str_replace('Service', '', $name);
-
-                $service = null;
-                if ($this->has($name)) {
-                    $service = $this->get($name);
-                } else if ($this->has($name . 'Service')) {
-                    $service = $this->get($name . 'Service');
-                }
-
-                if ($service != null) {
-                    $property->setValue($inject_object, $service);
-                }
-            }
-        }
     }
 }

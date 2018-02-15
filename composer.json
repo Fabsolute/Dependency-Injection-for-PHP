@@ -23,6 +23,7 @@
     }
   },
   "require": {
-    "doctrine/annotations": "^1.4"
+    "php": "^7.0",
+    "psr/container": "^1.0"
   }
 }
