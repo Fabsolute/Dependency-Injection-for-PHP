@@ -133,4 +133,37 @@ class Container implements \ArrayAccess, ContainerInterface
     {
         return false;
     }
+
+    /**
+     * @param callable|string|mixed
+     * @param array ...$parameters
+     * @author ahmetturk <ahmetturk93@gmail.com>
+     * @return mixed|null
+     */
+    public function createInstance($definition, ...$parameters)
+    {
+        $instance = null;
+        if (is_string($definition)) {
+            if (class_exists($definition)) {
+                $instance = new $definition(...$parameters);
+            }
+        } else {
+            if (is_callable($definition)) {
+                $instance = call_user_func_array($definition, $parameters);
+            } else {
+                $instance = $definition;
+            }
+        }
+
+        if ($instance instanceof ServiceFactoryBase) {
+            $instance->setContainer($this);
+            $instance = $instance->create($parameters);
+        }
+
+        if ($instance instanceof Injectable) {
+            $instance->setContainer($this);
+        }
+
+        return $instance;
+    }
 }

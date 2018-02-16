@@ -14,16 +14,20 @@ class ServiceDefinition
     private $parameters = null;
     /** @var string|callable */
     private $definition = null;
+    /** @var Container */
+    private $container = null;
 
     /**
      * ServiceDefinition constructor.
+     * @param Container $container
      * @param string $service_name
      * @param string|callable|mixed $definition
      * @param bool $shared
      * @param mixed[] $parameters
      */
-    public function __construct($service_name, $definition, $shared, $parameters = [])
+    public function __construct($container, $service_name, $definition, $shared, $parameters = [])
     {
+        $this->container = $container;
         $this->service_name = $service_name;
         $this->setDefinition($definition);
         $this->shared = $shared;
@@ -84,25 +88,7 @@ class ServiceDefinition
             }
         }
 
-        $instance = $this->instance;
-
-        $definition = $this->getDefinition();
-
-        if (is_string($definition)) {
-            if (class_exists($definition)) {
-                $instance = new $definition;
-            }
-        } else {
-            if (is_callable($definition)) {
-                $instance = call_user_func($definition);
-            } else {
-                $instance = $definition;
-            }
-        }
-
-        if ($instance instanceof ServiceFactoryBase) {
-            $instance = $instance->create($this->parameters);
-        }
+        $instance = $this->container->createInstance($this->getDefinition(), ...$this->parameters);
 
         if ($this->isShared()) {
             $this->instance = $instance;
