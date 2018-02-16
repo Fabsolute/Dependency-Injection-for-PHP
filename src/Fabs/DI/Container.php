@@ -24,7 +24,7 @@ class Container implements \ArrayAccess, ContainerInterface
      */
     public function set($service_name, $definition, $shared = false, $parameters = [])
     {
-        $service_definition = new ServiceDefinition($service_name, $definition, $shared, $parameters);
+        $service_definition = new ServiceDefinition($this, $service_name, $definition, $shared, $parameters);
         $this->service_lookup[$service_name] = $service_definition;
         return $service_definition;
     }
@@ -136,16 +136,16 @@ class Container implements \ArrayAccess, ContainerInterface
 
     /**
      * @param callable|string|mixed
-     * @param array ...$parameters
+     * @param array $parameters
      * @author ahmetturk <ahmetturk93@gmail.com>
      * @return mixed|null
      */
-    public function createInstance($definition, ...$parameters)
+    public function createInstance($definition, $parameters = [])
     {
         $instance = null;
         if (is_string($definition)) {
             if (class_exists($definition)) {
-                $instance = new $definition(...$parameters);
+                $instance = new $definition;
             }
         } else {
             if (is_callable($definition)) {

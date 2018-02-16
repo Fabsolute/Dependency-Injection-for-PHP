@@ -88,7 +88,7 @@ class ServiceDefinition
             }
         }
 
-        $instance = $this->container->createInstance($this->getDefinition(), ...$this->parameters);
+        $instance = $this->container->createInstance($this->getDefinition(), $this->parameters);
 
         if ($this->isShared()) {
             $this->instance = $instance;
