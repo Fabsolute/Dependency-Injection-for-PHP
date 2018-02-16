@@ -63,13 +63,7 @@ class Container implements \ArrayAccess, ContainerInterface
      */
     public function get($service_name)
     {
-        $service = $this->getService($service_name);
-        if ($service === null) {
-            // todo throw
-            return null;
-        }
-
-        return $this->resolve($service);
+        return $this->resolve($this->getService($service_name));
     }
 
     /**
