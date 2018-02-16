@@ -16,19 +16,6 @@ class DI implements \ArrayAccess, ContainerInterface
     protected $service_lookup = [];
 
     /**
-     * @return DI
-     * @author ahmetturk <ahmetturk93@gmail.com>
-     */
-    public static function getDefault()
-    {
-        if (self::$default_dependency_injector === null) {
-            self::$default_dependency_injector = new DI();
-        }
-
-        return self::$default_dependency_injector;
-    }
-
-    /**
      * @param DI $dependency_injector
      * @author ahmetturk <ahmetturk93@gmail.com>
      */
@@ -104,7 +91,7 @@ class DI implements \ArrayAccess, ContainerInterface
         $instance = $service->getInstance();
 
         if ($instance instanceof Injectable) {
-            $instance->setDI($this);
+            $instance->setContainer($this);
         }
 
         return $instance;
