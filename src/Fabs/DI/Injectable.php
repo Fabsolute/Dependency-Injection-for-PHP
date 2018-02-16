@@ -6,12 +6,12 @@ namespace Fabs\DI;
 abstract class Injectable
 {
     /**
-     * @var DI
+     * @var Container
      */
     private $container = null;
 
     /**
-     * @param DI $dependency_injector
+     * @param Container $dependency_injector
      * @author ahmetturk <ahmetturk93@gmail.com>
      */
     public function setContainer($dependency_injector)
@@ -20,7 +20,7 @@ abstract class Injectable
     }
 
     /**
-     * @return DI
+     * @return Container
      * @author ahmetturk <ahmetturk93@gmail.com>
      */
     public function getContainer()

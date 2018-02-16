@@ -4,25 +4,15 @@
 namespace Fabs\DI;
 
 
+use Fabs\DI\Exception\NotFoundException;
 use Psr\Container\ContainerInterface;
 
-class DI implements \ArrayAccess, ContainerInterface
+class Container implements \ArrayAccess, ContainerInterface
 {
-    /** @var DI */
-    private static $default_dependency_injector = null;
     /**
      * @var ServiceDefinition[]
      */
     protected $service_lookup = [];
-
-    /**
-     * @param DI $dependency_injector
-     * @author ahmetturk <ahmetturk93@gmail.com>
-     */
-    public static function setDefault($dependency_injector)
-    {
-        self::$default_dependency_injector = $dependency_injector;
-    }
 
     /**
      * @param string $service_name
@@ -54,6 +44,7 @@ class DI implements \ArrayAccess, ContainerInterface
     /**
      * @param string $service_name
      * @return ServiceDefinition
+     * @throws NotFoundException
      * @author ahmetturk <ahmetturk93@gmail.com>
      */
     public function getService($service_name)
@@ -61,14 +52,14 @@ class DI implements \ArrayAccess, ContainerInterface
         if (array_key_exists($service_name, $this->service_lookup)) {
             return $this->service_lookup[$service_name];
         }
-
-        return null;
+        throw new NotFoundException();
     }
 
     /**
      * @param string $service_name
      * @return mixed|null
      * @author ahmetturk <ahmetturk93@gmail.com>
+     * @throws NotFoundException
      */
     public function get($service_name)
     {
